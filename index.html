@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>SDLC Master | المحاضرة الثانية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* --- الألوان العصرية --- */
+            --bg-gradient-light: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --glass-bg-light: rgba(255, 255, 255, 0.95);
+            --glass-border-light: rgba(255, 255, 255, 0.6);
+            --text-main-light: #2d3748;
+            --primary-light: #8b5cf6;
+            --accent-light: #ec4899;
+            --header-bg-light: rgba(255, 255, 255, 0.98);
+
+            /* الوضع الداكن */
+            --bg-gradient-dark: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+            --glass-bg-dark: rgba(30, 41, 59, 0.95);
+            --glass-border-dark: rgba(255, 255, 255, 0.1);
+            --text-main-dark: #f1f5f9;
+            --primary-dark: #a78bfa;
+            --accent-dark: #f472b6;
+            --header-bg-dark: rgba(15, 23, 42, 0.98);
+
+            /* المتغيرات النشطة */
+            --bg-body: var(--bg-gradient-light);
+            --glass: var(--glass-bg-light);
+            --border: var(--glass-border-light);
+            --text: var(--text-main-light);
+            --primary: var(--primary-light);
+            --accent: var(--accent-light);
+            --header-bg: var(--header-bg-light);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: var(--bg-gradient-dark);
+            --glass: var(--glass-bg-dark);
+            --border: var(--glass-border-dark);
+            --text: var(--text-main-dark);
+            --primary: var(--primary-dark);
+            --accent: var(--accent-dark);
+            --header-bg: var(--header-bg-dark);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        /* --- Global & Security Styles --- */
+        * { 
+            box-sizing: border-box; margin: 0; padding: 0; transition: all 0.3s ease; 
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+        }
+
+        input, textarea {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-body);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            height: 80px;
+            background: var(--header-bg);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 15px; z-index: 2; }
+        .header-title-container { 
+            text-align: center; position: absolute; left: 50%; transform: translateX(-50%);
+            white-space: nowrap; z-index: 1;
+        }
+        .header-title { font-weight: 900; font-size: 1.1rem; color: var(--primary); }
+        .header-subtitle { font-size: 0.75rem; color: var(--accent); font-weight: bold; }
+        .controls { display: flex; gap: 30px; align-items: center; z-index: 2; }
+
+        .btn-icon {
+            background: rgba(0,0,0,0.05); border: 1px solid var(--border);
+            padding: 8px 15px; border-radius: 12px; cursor: pointer; color: var(--text);
+            font-weight: bold; font-family: 'Cairo'; font-size: 0.85rem;
+        }
+        .btn-icon:hover { background: var(--primary); color: white; }
+
+        .info-btn {
+            background: rgba(236, 72, 153, 0.1); color: var(--accent); border: 1px solid var(--accent);
+            padding: 5px 12px; font-size: 1.2rem; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .info-btn:hover { background: var(--accent); color: white; transform: rotate(15deg); }
+
+        /* --- Progress Bar --- */
+        .progress-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(0,0,0,0.1); z-index: 100;
+        }
+        .progress-bar {
+            height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        /* --- Lang Button --- */
+        .lang-button {
+            height: 50px; width: 150px; border: none; border-radius: 10px; cursor: pointer;
+            position: relative; overflow: hidden; transition: all 0.5s ease-in-out;
+            background: transparent; font-family: 'Cairo', sans-serif;
+        }
+        .lang-button:hover { box-shadow: .5px .5px 150px var(--primary); }
+        .type1::after {
+            content: attr(data-hover); height: 50px; width: 150px;
+            background-color: var(--primary); color: #fff; position: absolute; top: 0%; left: 0%;
+            transform: translateY(50px); font-size: 1.1rem; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; transition: all 0.5s ease-in-out;
+        }
+        .type1::before {
+            content: attr(data-main); height: 50px; width: 150px;
+            background-color: var(--glass); color: var(--primary); position: absolute; top: 0%; left: 0%;
+            transform: translateY(0px) scale(1.2); font-size: 1.1rem; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; transition: all 0.5s ease-in-out;
+            border: 1px solid var(--border); border-radius: 10px;
+        }
+        .type1:hover::after { transform: translateY(0) scale(1.2); }
+        .type1:hover::before { transform: translateY(-50px) scale(0) rotate(120deg); }
+
+        /* --- Layout --- */
+        .container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        aside {
+            width: 320px; background: var(--glass); border-inline-end: 1px solid var(--border);
+            display: flex; flex-direction: column; backdrop-filter: blur(15px); z-index: 900;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .search-area { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: center; overflow: hidden; position: relative; }
+        .slide-list { list-style: none; overflow-y: auto; flex: 1; padding: 10px; }
+        .list-item {
+            padding: 12px 15px; margin-bottom: 6px; border-radius: 10px; cursor: pointer;
+            font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center;
+        }
+        .list-item:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
+        .list-item.active { background: linear-gradient(90deg, var(--primary), var(--accent)); color: white; font-weight: bold; }
+        
+        main { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; scroll-behavior: smooth; }
+        .card {
+            background: var(--glass); width: 100%; max-width: 850px; padding: 40px; border-radius: 24px;
+            border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .badge {
+            display: inline-block; padding: 6px 16px; border-radius: 50px;
+            background: rgba(236, 72, 153, 0.1); color: var(--accent);
+            font-weight: bold; font-size: 0.85rem; margin-bottom: 20px;
+        }
+        h1 { font-size: 1.8rem; margin-bottom: 25px; line-height: 1.5; color: var(--primary); }
+        .content { font-size: 1.2rem; line-height: 1.9; margin-bottom: 30px; color: var(--text); }
+        ul, ol { padding-inline-start: 25px; } li { margin-bottom: 12px; }
+
+        /* تنسيق الصور */
+        .content img { 
+            width: 100%; border-radius: 12px; border: 2px solid var(--border); margin: 15px 0; 
+            max-height: 350px; object-fit: contain; background: rgba(255,255,255,0.05); 
+            transition: transform 0.3s;
+        }
+        .content img:hover { transform: scale(1.02); }
+
+        .section-box { margin-top: 20px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .section-header {
+            background: rgba(255,255,255,0.03); padding: 18px 25px; cursor: pointer;
+            font-weight: bold; display: flex; justify-content: space-between; align-items: center;
+        }
+        .section-content { display: none; padding: 25px; border-top: 1px solid var(--border); }
+        .section-box.open .section-content { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .quiz-item { background: rgba(0,0,0,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .quiz-q { font-weight: bold; color: var(--primary); cursor: pointer; display: flex; justify-content: space-between; }
+        .quiz-a { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); color: var(--accent); font-weight: bold; }
+        .quiz-item.revealed .quiz-a { display: block; animation: fadeIn 0.3s; }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content {
+            background: var(--glass); padding: 40px; border-radius: 20px;
+            border: 1px solid var(--border); max-width: 400px; width: 100%; text-align: center;
+            box-shadow: var(--shadow); animation: popIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .nav-actions { display: flex; gap: 60px; margin-top: 30px; justify-content: center; flex-wrap: wrap; }
+        .styled-btn {
+            position: relative; width: 11em; height: 4em; outline: none; transition: 0.1s;
+            background-color: transparent; border: none; font-size: 13px; font-weight: bold;
+            color: var(--text); cursor: pointer; font-family: 'Cairo', sans-serif;
+        }
+        .clip-box {
+            --color: var(--primary); position: absolute; top: 0; left: 0; overflow: hidden; width: 100%; height: 100%;
+            border: 5px double var(--color);
+            box-shadow: inset 0px 0px 15px rgba(39, 97, 195, 0.3);
+            -webkit-clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+        }
+        .arrow { position: absolute; transition: 0.2s; background-color: var(--primary); top: 35%; width: 11%; height: 30%; }
+        .leftArrow { left: -13.5%; -webkit-clip-path: polygon(100% 0, 100% 100%, 0 50%); clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+        .rightArrow { -webkit-clip-path: polygon(100% 49%, 0 0, 0 100%); clip-path: polygon(100% 49%, 0 0, 0 100%); left: 102%; }
+        .styled-btn:hover .rightArrow { background-color: var(--accent); left: -15%; animation: 0.6s ease-in-out both infinite alternate rightArrow8; }
+        .styled-btn:hover .leftArrow { background-color: var(--accent); left: 103%; animation: 0.6s ease-in-out both infinite alternate leftArrow8; }
+        .corner {
+            position: absolute; width: 4em; height: 4em; background-color: var(--primary);
+            box-shadow: inset 1px 1px 8px var(--primary); transform: scale(1) rotate(45deg); transition: 0.2s;
+        }
+        .rightTop { top: -1.98em; left: 91%; } .leftTop { top: -1.96em; left: -3.0em; }
+        .leftBottom { top: 2.10em; left: -2.15em; } .rightBottom { top: 45%; left: 88%; }
+        .styled-btn:hover .corner { transform: scale(1.25) rotate(45deg); background-color: var(--accent); box-shadow: inset 1px 1px 8px var(--accent); }
+        .styled-btn:hover .clip-box { animation: 0.2s ease-in-out 0.55s both greenLight8; --color: var(--accent); }
+        @keyframes greenLight8 { from { } to { box-shadow: inset 0px 0px 32px var(--accent); } }
+        @keyframes leftArrow8 { from { transform: translate(0px); } to { transform: translateX(10px); } }
+        @keyframes rightArrow8 { from { transform: translate(0px); } to { transform: translateX(-10px); } }
+        .styled-btn:disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+
+        /* BB8 Toggle */
+        .bb8-toggle { --toggle-size: 6px; --toggle-width: 10.625em; --toggle-height: 5.625em; --toggle-offset: calc((var(--toggle-height) - var(--bb8-diameter)) / 2); --toggle-bg: linear-gradient(#2c4770, #070e2b 35%, #628cac 50% 70%, #a6c5d4) no-repeat; --bb8-diameter: 4.375em; --radius: 99em; --transition: 0.4s; --accent: #de7d2f; --bb8-bg: #fff; cursor: pointer; font-size: var(--toggle-size); display: inline-block; }
+        .bb8-toggle *, .bb8-toggle *::before, .bb8-toggle *::after { box-sizing: border-box; }
+        .bb8-toggle__checkbox { appearance: none; display: none; }
+        .bb8-toggle__container { width: var(--toggle-width); height: var(--toggle-height); background: var(--toggle-bg); background-size: 100% 11.25em; background-position-y: -5.625em; border-radius: var(--radius); position: relative; transition: var(--transition); }
+        .bb8 { display: flex; flex-direction: column; align-items: center; position: absolute; top: calc(var(--toggle-offset) - 1.688em + 0.188em); left: var(--toggle-offset); transition: var(--transition); z-index: 2; }
+        .bb8__head-container { position: relative; transition: var(--transition); z-index: 2; transform-origin: 1.25em 3.75em; }
+        .bb8__head { overflow: hidden; margin-bottom: -0.188em; width: 2.5em; height: 1.688em; background: linear-gradient(transparent 0.063em, dimgray 0.063em 0.313em, transparent 0.313em 0.375em, var(--accent) 0.375em 0.5em, transparent 0.5em 1.313em, silver 1.313em 1.438em, transparent 1.438em), linear-gradient(45deg, transparent 0.188em, var(--bb8-bg) 0.188em 1.25em, transparent 1.25em), linear-gradient(-45deg, transparent 0.188em, var(--bb8-bg) 0.188em 1.25em, transparent 1.25em), linear-gradient(var(--bb8-bg) 1.25em, transparent 1.25em); border-radius: var(--radius) var(--radius) 0 0; position: relative; z-index: 1; filter: drop-shadow(0 0.063em 0.125em gray); }
+        .bb8__head::before { content: ""; position: absolute; width: 0.563em; height: 0.563em; background: radial-gradient(0.125em circle at 0.25em 0.375em, red, transparent), radial-gradient(0.063em circle at 0.375em 0.188em, var(--bb8-bg) 50%, transparent 100%), linear-gradient(45deg, #000 0.188em, dimgray 0.313em 0.375em, #000 0.5em); border-radius: var(--radius); top: 0.413em; left: 50%; transform: translate(-50%); box-shadow: 0 0 0 0.089em lightgray, 0.563em 0.281em 0 -0.148em, 0.563em 0.281em 0 -0.1em var(--bb8-bg), 0.563em 0.281em 0 -0.063em; z-index: 1; transition: var(--transition); }
+        .bb8__head::after { content: ""; position: absolute; bottom: 0.375em; left: 0; width: 100%; height: 0.188em; background: linear-gradient(to right, var(--accent) 0.125em, transparent 0.125em 0.188em, var(--accent) 0.188em 0.313em, transparent 0.313em 0.375em, var(--accent) 0.375em 0.938em, transparent 0.938em 1em, var(--accent) 1em 1.125em, transparent 1.125em 1.875em, var(--accent) 1.875em 2em, transparent 2em 2.063em, var(--accent) 2.063em 2.25em, transparent 2.25em 2.313em, var(--accent) 2.313em 2.375em, transparent 2.375em 2.438em, var(--accent) 2.438em); transition: var(--transition); }
+        .bb8__antenna { position: absolute; transform: translateY(-90%); width: 0.059em; border-radius: var(--radius) var(--radius) 0 0; transition: var(--transition); }
+        .bb8__antenna:nth-child(1) { height: 0.938em; right: 0.938em; background: linear-gradient(#000 0.188em, silver 0.188em); }
+        .bb8__antenna:nth-child(2) { height: 0.375em; left: 50%; transform: translate(-50%, -90%); background: silver; }
+        .bb8__body { width: 4.375em; height: 4.375em; background: var(--bb8-bg); border-radius: var(--radius); position: relative; overflow: hidden; transition: var(--transition); z-index: 1; transform: rotate(45deg); background: linear-gradient(-90deg, var(--bb8-bg) 4%, var(--accent) 4% 10%, transparent 10% 90%, var(--accent) 90% 96%, var(--bb8-bg) 96%), linear-gradient(var(--bb8-bg) 4%, var(--accent) 4% 10%, transparent 10% 90%, var(--accent) 90% 96%, var(--bb8-bg) 96%), linear-gradient(to right, transparent 2.156em, silver 2.156em 2.219em, transparent 2.188em), linear-gradient(transparent 2.156em, silver 2.156em 2.219em, transparent 2.188em); background-color: var(--bb8-bg); }
+        .bb8__body::after { content: ""; bottom: 1.5em; left: 0.563em; position: absolute; width: 0.188em; height: 0.188em; background: rgb(236, 236, 236); color: rgb(236, 236, 236); border-radius: 50%; box-shadow: 0.875em 0.938em, 0 -1.25em, 0.875em -2.125em, 2.125em -2.125em, 3.063em -1.25em, 3.063em 0, 2.125em 0.938em; }
+        .bb8__body::before { content: ""; width: 2.625em; height: 2.625em; position: absolute; border-radius: 50%; z-index: 0.1; overflow: hidden; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 0.313em solid var(--accent); background: radial-gradient(1em circle at center, rgb(236, 236, 236) 50%, transparent 51%), radial-gradient(1.25em circle at center, var(--bb8-bg) 50%, transparent 51%), linear-gradient(-90deg, transparent 42%, var(--accent) 42% 58%, transparent 58%), linear-gradient(var(--bb8-bg) 42%, var(--accent) 42% 58%, var(--bb8-bg) 58%); }
+        .artificial__hidden { position: absolute; border-radius: inherit; inset: 0; pointer-events: none; overflow: hidden; }
+        .bb8__shadow { content: ""; width: var(--bb8-diameter); height: 20%; border-radius: 50%; background: #3a271c; box-shadow: 0.313em 0 3.125em #3a271c; opacity: 0.25; position: absolute; bottom: 0; left: calc(var(--toggle-offset) - 0.938em); transition: var(--transition); transform: skew(-70deg); z-index: 1; }
+        .bb8-toggle__scenery { width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative; border-radius: inherit; }
+        .bb8-toggle__scenery::before { content: ""; position: absolute; width: 100%; height: 30%; bottom: 0; background: #b18d71; z-index: 1; }
+        .bb8-toggle__cloud { z-index: 1; position: absolute; border-radius: 50%; }
+        .bb8-toggle__cloud:nth-last-child(1) { width: 0.875em; height: 0.625em; filter: blur(0.125em) drop-shadow(0.313em 0.313em #ffffffae) drop-shadow(-0.625em 0 #fff) drop-shadow(-0.938em -0.125em #fff); right: 1.875em; top: 2.813em; background: linear-gradient(to top right, #ffffffae, #ffffffae); transition: var(--transition); }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8-toggle__star:nth-child(1) { top: 0.625em; }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8 { left: calc(100% - var(--bb8-diameter) - var(--toggle-offset)); }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8__shadow { left: calc(100% - var(--bb8-diameter) - var(--toggle-offset) + 0.938em); transform: skew(70deg); }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8__body { transform: rotate(225deg); }
+        .bb8-toggle__checkbox:active + .bb8-toggle__container .bb8__head-container { transform: rotate(25deg); }
+        .bb8-toggle__checkbox:checked:active + .bb8-toggle__container .bb8__head-container { transform: rotate(-25deg); }
+
+        /* Search Bar */
+        .grid { height: 100%; width: 100%; background-image: linear-gradient(to right, #0f0f10 1px, transparent 1px), linear-gradient(to bottom, #0f0f10 1px, transparent 1px); background-size: 1rem 1rem; background-position: center center; position: absolute; z-index: -1; filter: blur(1px); opacity: 0.3; }
+        .white, .border, .darkBorderBg, .glow { max-height: 70px; max-width: 314px; height: 100%; width: 100%; position: absolute; overflow: hidden; z-index: -1; border-radius: 12px; filter: blur(3px); }
+        .search-input-styled { background-color: #010201; border: none; width: 280px; height: 56px; border-radius: 10px; color: white; padding-inline: 59px; font-size: 14px; font-family: 'Cairo'; }
+        #poda { display: flex; align-items: center; justify-content: center; position: relative; zoom: 0.85; }
+        .search-input-styled::placeholder { color: #c0b9c0; }
+        .search-input-styled:focus { outline: none; }
+        #main:focus-within > #input-mask { display: none; }
+        #input-mask { pointer-events: none; width: 100px; height: 20px; position: absolute; background: linear-gradient(90deg, transparent, black); top: 18px; left: 70px; }
+        #pink-mask { pointer-events: none; width: 30px; height: 20px; position: absolute; background: #cf30aa; top: 10px; left: 5px; filter: blur(20px); opacity: 0.8; transition: all 2s; }
+        #main:hover > #pink-mask { opacity: 0; }
+        .white { max-height: 63px; max-width: 307px; border-radius: 10px; filter: blur(2px); }
+        .white::before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(83deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; filter: brightness(1.4); background-image: conic-gradient(rgba(0, 0, 0, 0) 0%, #a099d8, rgba(0, 0, 0, 0) 8%, rgba(0, 0, 0, 0) 50%, #dfa2da, rgba(0, 0, 0, 0) 58%); transition: all 2s; }
+        .border { max-height: 59px; max-width: 303px; border-radius: 11px; filter: blur(0.5px); }
+        .border::before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(70deg); position: absolute; width: 600px; height: 600px; filter: brightness(1.3); background-repeat: no-repeat; background-position: 0 0; background-image: conic-gradient(#1c191c, #402fb5 5%, #1c191c 14%, #1c191c 50%, #cf30aa 60%, #1c191c 64%); transition: all 2s; }
+        .darkBorderBg { max-height: 65px; max-width: 312px; }
+        .darkBorderBg::before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(82deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; background-image: conic-gradient(rgba(0, 0, 0, 0), #18116a, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, 0) 50%, #6e1b60, rgba(0, 0, 0, 0) 60%); transition: all 2s; }
+        #poda:hover > .darkBorderBg::before { transform: translate(-50%, -50%) rotate(262deg); }
+        #poda:hover > .glow::before { transform: translate(-50%, -50%) rotate(240deg); }
+        #poda:hover > .white::before { transform: translate(-50%, -50%) rotate(263deg); }
+        #poda:hover > .border::before { transform: translate(-50%, -50%) rotate(250deg); }
+        #poda:focus-within > .darkBorderBg::before { transform: translate(-50%, -50%) rotate(442deg); transition: all 4s; }
+        #poda:focus-within > .glow::before { transform: translate(-50%, -50%) rotate(420deg); transition: all 4s; }
+        #poda:focus-within > .white::before { transform: translate(-50%, -50%) rotate(443deg); transition: all 4s; }
+        #poda:focus-within > .border::before { transform: translate(-50%, -50%) rotate(430deg); transition: all 4s; }
+        .glow { overflow: hidden; filter: blur(30px); opacity: 0.4; max-height: 130px; max-width: 354px; }
+        .glow:before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(60deg); position: absolute; width: 999px; height: 999px; background-repeat: no-repeat; background-position: 0 0; background-image: conic-gradient(#000, #402fb5 5%, #000 38%, #000 50%, #cf30aa 60%, #000 87%); transition: all 2s; }
+        #filter-icon { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; justify-content: center; z-index: 2; max-height: 40px; max-width: 38px; height: 100%; width: 100%; isolation: isolate; overflow: hidden; border-radius: 10px; background: linear-gradient(180deg, #161329, black, #1d1b4b); border: 1px solid transparent; }
+        .filterBorder { height: 42px; width: 40px; position: absolute; overflow: hidden; top: 7px; right: 7px; border-radius: 10px; }
+        .filterBorder::before { content: ""; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; filter: brightness(1.35); background-image: conic-gradient(rgba(0, 0, 0, 0), #3d3a4f, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0) 50%, #3d3a4f, rgba(0, 0, 0, 0) 100%); animation: rotate 4s linear infinite; }
+        #main { position: relative; }
+        #search-icon { position: absolute; left: 20px; top: 15px; }
+        @keyframes rotate { 100% { transform: translate(-50%, -50%) rotate(450deg); } }
+
+        /* Media Queries */
+        .menu-btn { display: none; background: none; border: none; font-size: 1.5rem; color: var(--text); cursor: pointer; z-index: 10; }
+        @media (max-width: 768px) {
+            header { padding: 0 15px; }
+            .header-subtitle { display: none; }
+            .header-title-container { position: static; transform: none; text-align: right; flex: 1; margin: 0 10px; }
+            .header-title { font-size: 0.9rem; }
+            .controls { gap: 10px; }
+            .lang-button { width: 100px; height: 40px; }
+            .type1::after, .type1::before { width: 100px; height: 40px; font-size: 0.9rem; }
+            .bb8-toggle { --toggle-size: 4px; display: inline-block !important; }
+            aside { position: fixed; right: -320px; height: calc(100vh - 80px); top: 80px; width: 280px; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+            aside.open { right: 0; }
+            .menu-btn { display: block; }
+            [dir="ltr"] aside { right: auto; left: -320px; border-right: 1px solid var(--border); border-left: none; }
+            [dir="ltr"] aside.open { left: 0; }
+            #poda { zoom: 0.7; }
+            main { padding: 15px; }
+            .card { padding: 25px; margin-bottom: 20px; }
+            h1 { font-size: 1.4rem; }
+            .content { font-size: 1rem; line-height: 1.7; }
+            .nav-actions { gap: 20px; }
+            .styled-btn { font-size: 11px; }
+        }
+        @media (max-width: 480px) {
+            .header-title { display: none; }
+            .controls { flex: 1; justify-content: flex-end; }
+            .styled-btn { width: 9em; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <div id="infoModal" class="modal-overlay" onclick="toggleInfo()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="font-size: 3rem; margin-bottom: 15px;">ℹ️</div>
+            <h2 style="color: var(--primary); margin-bottom: 15px;">عن المحاضرة 2</h2>
+            <p style="color: var(--text); line-height: 1.6; margin-bottom: 25px;">
+                المحاضرة دي بتتكلم عن "نماذج تطوير البرمجيات" (Waterfall, V-Shaped, Prototyping, Spiral) وإزاي تختار الأنسب لمشروعك.
+                كمان بتركز على "إدارة المشروعات" والمثلث الذهبي (وقت - تكلفة - جودة) ومكونات إدارة المشروع الناجح.
+            </p>
+            <button class="btn-icon" onclick="toggleInfo()">إغلاق</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-right">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <button class="info-btn" onclick="toggleInfo()" title="معلومات">ℹ</button>
+        </div>
+        
+        <div class="header-title-container">
+            <div class="header-title" id="pageTitle">المحاضرة الثانية</div>
+            <div class="header-subtitle">Methodologies & PM</div>
+        </div>
+
+        <div class="controls">
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+            
+            <label class="bb8-toggle" title="الوضع الليلي">
+                <input class="bb8-toggle__checkbox" type="checkbox" onchange="toggleTheme()" id="themeCheckbox">
+                <div class="bb8-toggle__container">
+                  <div class="bb8-toggle__scenery">
+                    <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
+                    <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
+                    <div class="bb8-toggle__star"></div>
+                    <div class="tatto-1"></div><div class="tatto-2"></div>
+                    <div class="gomrassen"></div><div class="hermes"></div><div class="chenini"></div>
+                    <div class="bb8-toggle__cloud"></div><div class="bb8-toggle__cloud"></div><div class="bb8-toggle__cloud"></div>
+                  </div>
+                  <div class="bb8">
+                    <div class="bb8__head-container"><div class="bb8__antenna"></div><div class="bb8__antenna"></div><div class="bb8__head"></div></div>
+                    <div class="bb8__body"></div>
+                  </div>
+                  <div class="artificial__hidden"><div class="bb8__shadow"></div></div>
+                </div>
+              </label>
+
+            <button class="lang-button type1" onclick="toggleLang()" id="langBtn" data-main="🇺🇸 English" data-hover="Switch ⇆"></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside id="sidebar">
+            <div class="search-area">
+                <div class="grid"></div>
+                <div id="poda">
+                    <div class="glow"></div><div class="darkBorderBg"></div><div class="darkBorderBg"></div>
+                    <div class="darkBorderBg"></div><div class="white"></div><div class="border"></div>
+                    <div id="main">
+                        <input placeholder="Search..." type="text" id="searchInp" class="search-input-styled" onkeyup="filterSlides()" />
+                        <div id="input-mask"></div><div id="pink-mask"></div>
+                        <div class="filterBorder"></div>
+                        <div id="filter-icon">
+                            <svg preserveAspectRatio="none" height="27" width="27" viewBox="4.8 4.56 14.832 15.408" fill="none"><path d="M8.16 6.65002H15.83C16.47 6.65002 16.99 7.17002 16.99 7.81002V9.09002C16.99 9.56002 16.7 10.14 16.41 10.43L13.91 12.64C13.56 12.93 13.33 13.51 13.33 13.98V16.48C13.33 16.83 13.1 17.29 12.81 17.47L12 17.98C11.24 18.45 10.2 17.92 10.2 16.99V13.91C10.2 13.5 9.97 12.98 9.73 12.69L7.52 10.36C7.23 10.08 7 9.55002 7 9.20002V7.87002C7 7.17002 7.52 6.65002 8.16 6.65002Z" stroke="#d6d6e6" stroke-width="1" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </div>
+                        <div id="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 24 24" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" height="24" fill="none"><circle stroke="url(#search)" r="8" cy="11" cx="11"></circle><line stroke="url(#searchl)" y2="16.65" y1="22" x2="16.65" x1="22"></line><defs><linearGradient gradientTransform="rotate(50)" id="search"><stop stop-color="#f8e7f8" offset="0%"></stop><stop stop-color="#b6a9b7" offset="50%"></stop></linearGradient><linearGradient id="searchl"><stop stop-color="#b6a9b7" offset="0%"></stop><stop stop-color="#837484" offset="50%"></stop></linearGradient></defs></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ul class="slide-list" id="list"></ul>
+        </aside>
+
+        <main>
+            <div class="card" id="contentCard">
+                <span class="badge" id="slideBadge">Intro</span>
+                <h1 id="slideHeader">...</h1>
+                
+                <div id="normalSlideContent">
+                    <div class="content" id="slideHtml">...</div>
+                    <div class="section-box" onclick="toggleSection(this)">
+                        <div class="section-header">
+                            <span id="labelExpl">💡 الشرح المبسط</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="section-content" id="explText">...</div>
+                    </div>
+                </div>
+
+                <div id="quizSlideContent" style="display: none;">
+                    <p style="margin-bottom: 20px; color: var(--text);" id="quizIntro">اضغط على السؤال لإظهار الإجابة:</p>
+                    <div id="quizContainer"></div>
+                </div>
+
+                <div class="nav-actions">
+                    <button class="styled-btn" id="prevBtn" onclick="move(-1)">
+                        <span id="txtPrev">السابق</span>
+                        <div class="clip-box"><div class="leftTop corner"></div><div class="rightBottom corner"></div><div class="rightTop corner"></div><div class="leftBottom corner"></div></div>
+                        <span class="rightArrow arrow"></span><span class="leftArrow arrow"></span>
+                    </button>
+                    <button class="styled-btn" id="nextBtn" onclick="move(1)">
+                        <span id="txtNext">التالي</span>
+                        <div class="clip-box"><div class="leftTop corner"></div><div class="rightBottom corner"></div><div class="rightTop corner"></div><div class="leftBottom corner"></div></div>
+                        <span class="rightArrow arrow"></span><span class="leftArrow arrow"></span>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+    // --- بيانات المحاضرة الثانية (كاملة ومحدثة) ---
+    const slides = [
+        {
+            title: "المحاضرة الثانية: نماذج التطوير",
+            title_en: "Lec 2: Development Models",
+            content: `<div style="text-align: center;"><p>أهلاً بكم في المحاضرة الثانية.</p><p>هنتكلم النهاردة بالتفصيل عن <strong>نماذج تطوير البرمجيات (Process Models)</strong>.</p><p>وكمان <strong>إدارة المشروعات (Project Management)</strong> ومكوناتها السبعة.</p></div>`,
+            content_en: `<div style="text-align: center;"><p>Welcome to Lecture 2.</p><p>We will cover <strong>Software Process Models</strong> in detail.</p><p>And <strong>Project Management</strong> systems.</p></div>`,
+            expl: "النهاردة هنعرف كل طريقة لبناء السيستم (المميزات والعيوب) وإزاي تدير مشروعك بنجاح.",
+            expl_en: "Detailed look at how to build systems (pros/cons) and manage projects.",
+            q: "ما هو موضوع المحاضرة؟", q_en: "Lecture topic?", a: "نماذج التطوير وإدارة المشروعات.", a_en: "Development Models & Project Management."
+        },
+        {
+            title: "1. نموذج الشلال (Waterfall Model)",
+            title_en: "1. Waterfall Model",
+            content: `
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e2/Waterfall_model.svg" alt="Waterfall Model" onerror="this.style.display='none'">
+            <ul>
+                <li>نموذج تسلسلي (Sequential).</li>
+                <li>يجب إنهاء كل مرحلة بالكامل قبل الانتقال للتالية (لا رجعة).</li>
+                <li><strong>المراحل:</strong> المتطلبات -> التصميم -> التنفيذ -> الاختبار -> التثبيت -> الصيانة.</li>
+            </ul>`,
+            content_en: `
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e2/Waterfall_model.svg" alt="Waterfall Model" onerror="this.style.display='none'">
+            <ul>
+                <li>Sequential design process.</li>
+                <li>Each phase must be completed before the next begins.</li>
+                <li><strong>Phases:</strong> Req -> Design -> Impl -> Test -> Install -> Maint.</li>
+            </ul>`,
+            expl: "زي الشلال، الماية بتنزل ومبترجعش. لازم تخلص التخطيط 100% عشان تبدأ تصميم، وهكذا.",
+            expl_en: "Like a waterfall, flows down only. Finish one stage 100% before starting the next.",
+            q: "ما هي السمة الرئيسية للشلال؟", q_en: "Main feature?", a: "تسلسلي (Sequential).", a_en: "Sequential."
+        },
+        {
+            title: "تفاصيل الشلال (المميزات والعيوب)",
+            title_en: "Waterfall: Pros & Cons",
+            content: `
+            <p><strong>المميزات:</strong></p>
+            <ul><li>سهل الفهم والإدارة.</li><li>نقاط محددة (Milestones) واضحة.</li><li>مناسب للمتطلبات الثابتة.</li></ul>
+            <p><strong>العيوب الخطيرة:</strong></p>
+            <ul>
+                <li><strong>Big Bang:</strong> التجميع بيحصل مرة واحدة في الآخر (مفاجآت سيئة).</li>
+                <li><strong>متجمد (Frozen):</strong> صعب جداً تعدل أي حاجة بعد ما المرحلة تخلص.</li>
+                <li>العميل مش بيشوف حاجة غير في النهاية.</li>
+            </ul>`,
+            content_en: `
+            <p><strong>Pros:</strong> Easy to manage, clear milestones, good for stable specs.</p>
+            <p><strong>Cons:</strong></p>
+            <ul>
+                <li><strong>Big Bang:</strong> Integration happens at the very end.</li>
+                <li><strong>Frozen:</strong> Hard to change requirements later.</li>
+                <li>Customer sees nothing until the end.</li>
+            </ul>`,
+            expl: "ميزته النظام، بس عيبه القاتل إنك لو اكتشفت غلطة في الآخر، بتعيد الشغل كله (بيج بانج).",
+            expl_en: "Organized, but fatal flaw: finding a bug at the end means redoing everything.",
+            q: "ما هي مشكلة الـ Big Bang؟", q_en: "What is Big Bang issue?", a: "التجميع النهائي المفاجئ.", a_en: "Sudden final integration."
+        },
+        {
+            title: "2. نموذج V-Shaped",
+            title_en: "2. V-Shaped Model",
+            content: `
+            
+
+[Image of V-Model SDLC verification validation diagram]
+
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Systems_Engineering_Process_II.svg" alt="V-Model" onerror="this.style.display='none'">
+            <ul>
+                <li>يشبه الشلال ولكنه يركز على <strong>الاختبار (Testing)</strong>.</li>
+                <li>كل مرحلة تطوير (يسار) يقابلها مرحلة اختبار (يمين).</li>
+                <li><strong>Verification:</strong> هل نبني المنتج بطريقة صحيحة؟</li>
+                <li><strong>Validation:</strong> هل نبني المنتج الصحيح (اللي عايزه العميل)؟</li>
+            </ul>`,
+            content_en: `
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Systems_Engineering_Process_II.svg" alt="V-Model" onerror="this.style.display='none'">
+            <ul>
+                <li>Focuses on Testing. Dev phases (left) match Test phases (right).</li>
+                <li><strong>Verification:</strong> Are we building it right?</li>
+                <li><strong>Validation:</strong> Are we building the right product?</li>
+            </ul>`,
+            expl: "نفس الشلال بس كل خطوة بنعملها، بنجهز لها الاختبار بتاعها فوراً. ده بيضمن الجودة.",
+            expl_en: "Like Waterfall, but we plan tests for every single step immediately. Quality focus.",
+            q: "الفرق بين Verification و Validation؟", q_en: "Diff between Ver & Val?", a: "Ver: الطريقة صح؟ Val: المنتج صح؟", a_en: "Ver: Build right? Val: Right product?"
+        },
+        {
+            title: "3. النموذج الأولي (Prototyping)",
+            title_en: "3. Prototyping Model",
+            content: `
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Prototyping_Model.jpg" alt="Prototyping" onerror="this.style.display='none'">
+            <ul>
+                <li>بناء نسخة مبدئية وسريعة (Mock-up) عشان العميل يشوفها.</li>
+                <li><strong>المميزات:</strong> كشف الأخطاء مبكراً، العميل مبسوط لأنه مشارك.</li>
+                <li><strong>العيوب:</strong> العميل ممكن يفتكر إن ده المنتج النهائي، وممكن يكلفنا فلوس زيادة.</li>
+            </ul>`,
+            content_en: `
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Prototyping_Model.jpg" alt="Prototyping" onerror="this.style.display='none'">
+            <ul>
+                <li>Building a quick version for user feedback.</li>
+                <li><strong>Pros:</strong> Early feedback, user involvement.</li>
+                <li><strong>Cons:</strong> Client might think it's real, extra cost.</li>
+            </ul>`,
+            expl: "بنعمل 'عينة' سريعة. العميل يلعب بيها ويقول ملاحظاته، وبعدين نبني النظام الحقيقي.",
+            expl_en: "Making a quick sample. Client plays with it, gives feedback, then we build real system.",
+            q: "متى نستخدم الـ Prototyping؟", q_en: "When to use?", a: "عندما تكون المتطلبات غير واضحة.", a_en: "When requirements are unclear."
+        },
+        {
+            title: "4. النموذج الحلزوني (Spiral Model)",
+            title_en: "4. Spiral Model",
+            content: `
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Spiral_model_%28Boehm%2C_1988%29.svg" alt="Spiral Model" onerror="this.style.display='none'">
+            <ul>
+                <li>للمشاريع الكبيرة والخطيرة.</li>
+                <li>أهم ميزة: <strong>تحليل المخاطر (Risk Analysis)</strong>.</li>
+                <li>بيلف في 4 قطاعات: تخطيط -> تحليل مخاطر -> هندسة -> تقييم عميل.</li>
+            </ul>`,
+            content_en: `
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/Spiral_model_%28Boehm%2C_1988%29.svg" alt="Spiral Model" onerror="this.style.display='none'">
+            <ul>
+                <li>For large, high-risk projects.</li>
+                <li>Key: <strong>Risk Analysis</strong>.</li>
+                <li>4 Sectors: Planning -> Risk Analysis -> Engineering -> Evaluation.</li>
+            </ul>`,
+            expl: "بنمشي في دوامات. كل لفة بنعمل حتة من المشروع ونحلل المخاطر بتاعتها (أغلى وأعقد موديل).",
+            expl_en: "Working in loops. Each loop builds a part and checks risks. Complex and expensive.",
+            q: "ما يميز الحلزوني؟", q_en: "Key feature of Spiral?", a: "تحليل المخاطر.", a_en: "Risk Analysis."
+        },
+        {
+            title: "ما هو المشروع؟ (Project)",
+            title_en: "What is a Project?",
+            content: `<ul><li>مجهود <strong>مؤقت (Temporary)</strong>: له بداية ونهاية محددة.</li><li>لإنشاء منتج أو خدمة <strong>فريدة (Unique)</strong>: حاجة جديدة مش تكرار روتيني.</li></ul>`,
+            content_en: `<ul><li><strong>Temporary:</strong> Has start and end dates.</li><li><strong>Unique:</strong> Creates a specific, new product/service.</li></ul>`,
+            expl: "المشروع مش شغل كل يوم. المشروع ليه ميعاد تسليم وليه هدف محدد بيخلص عنده.",
+            expl_en: "Project isn't daily work. It has a deadline and a specific goal.",
+            q: "صفتان للمشروع؟", q_en: "2 Project attributes?", a: "مؤقت وفريد.", a_en: "Temporary & Unique."
+        },
+        {
+            title: "مثلث إدارة المشروعات",
+            title_en: "Project Management Triangle",
+            content: `
+            
+
+[Image of Project Management Triangle Time Cost Scope]
+
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Project-triangle-en.svg/320px-Project-triangle-en.svg.png" alt="PM Triangle" onerror="this.style.display='none'">
+            <p>لضمان الجودة، لازم توازن بين:</p>
+            <ul>
+                <li><strong>الوقت (Time):</strong> الجدول الزمني.</li>
+                <li><strong>التكلفة (Cost):</strong> الميزانية.</li>
+                <li><strong>النطاق (Scope):</strong> حجم الشغل والمميزات.</li>
+            </ul>
+            <p>أي تغيير في واحد بيأثر على الباقيين.</p>`,
+            content_en: `
+            
+
+[Image of Project Management Triangle Time Cost Scope]
+
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Project-triangle-en.svg/320px-Project-triangle-en.svg.png" alt="PM Triangle" onerror="this.style.display='none'">
+            <p>Balance between:</p>
+            <ul><li><strong>Time.</strong></li><li><strong>Cost.</strong></li><li><strong>Scope.</strong></li></ul>
+            <p>Changing one affects others.</p>`,
+            expl: "مثلث الرعب. عايز تخلص بسرعة؟ ادفع أكتر. عايز توفر؟ قلل المميزات.",
+            expl_en: "Want it fast? Pay more. Want it cheap? Cut features.",
+            q: "ما هي القيود الثلاثة؟", q_en: "3 Constraints?", a: "وقت، تكلفة، نطاق.", a_en: "Time, Cost, Scope."
+        },
+        {
+            title: "🔥 نظام إدارة المشروعات (هام)",
+            title_en: "Project Management System",
+            content: `<p>عشان تدير مشروع بنجاح، لازم يكون عندك نظام مكون من <strong>7 عناصر</strong>.</p><p>لو عنصر واحد وقع، الإدارة هتفشل.</p>`,
+            content_en: `<p>Successful management requires a system of <strong>7 Components</strong>.</p><p>Failure of one leads to difficulty.</p>`,
+            expl: "الإدارة مش مدير وبس. دي 7 تروس لازم يلفوا مع بعض.",
+            expl_en: "Management isn't just a boss. It's 7 gears working together.",
+            q: "كم عدد مكونات النظام؟", q_en: "How many components?", a: "سبعة.", a_en: "Seven."
+        },
+        {
+            title: "1. العوامل البشرية (Human Factors)",
+            title_en: "1. Human Factors",
+            content: `<ul>
+                <li>أهم جزء في النظام. يشمل:</li>
+                <li><strong>القيادة (Leadership).</strong></li>
+                <li><strong>التفاوض (Negotiation).</strong></li>
+                <li><strong>بناء الفريق (Team building).</strong></li>
+                <li><strong>التحفيز (Motivation).</strong></li>
+                <li><strong>الاتصال (Communication).</strong></li>
+                <li><strong>اتخاذ القرار (Decision Making).</strong></li>
+            </ul>`,
+            content_en: `<ul>
+                <li>Most important part. Includes:</li>
+                <li>Leadership, Negotiation, Team building, Motivation, Communication, Decision Making.</li>
+            </ul>`,
+            expl: "إزاي تتعامل مع الناس، تقودهم، تحل مشاكلهم، وتحفزهم. ده أصعب وأهم جزء.",
+            expl_en: "How to handle people, lead, solve conflicts, and motivate. The hardest and most important part.",
+            q: "أهم مكون في النظام؟", q_en: "Most important component?", a: "العوامل البشرية.", a_en: "Human Factors."
+        },
+        {
+            title: "2, 3, 4: الطريقة والثقافة والتنظيم",
+            title_en: "2, 3, 4: Method, Culture, Org",
+            content: `<ul>
+                <li><strong>2. المنهجية (Method):</strong> الأدوات والطرق اللي هنشتغل بيها (Tools of trade).</li>
+                <li><strong>3. الثقافة (Culture):</strong> قيم وبيئة الشركة (بتشجع ولا بتحبط؟ وتأثيرها على العمل).</li>
+                <li><strong>4. التنظيم (Organization):</strong> تحديد السلطة والمسؤولية والمحاسبة (Authority, Responsibility, Accountability).</li>
+            </ul>`,
+            content_en: `<ul>
+                <li><strong>2. Method:</strong> Tools & techniques used.</li>
+                <li><strong>3. Culture:</strong> Values & environment affecting everything.</li>
+                <li><strong>4. Organization:</strong> Defining Authority, Responsibility, and Accountability.</li>
+            </ul>`,
+            expl: "الأدوات (Method)، الجو العام (Culture)، وتوزيع المناصب (Organization).",
+            expl_en: "Tools, Atmosphere, and Roles.",
+            q: "المكون المسؤول عن توزيع السلطة؟", q_en: "Defines Authority?", a: "التنظيم (Organization).", a_en: "Organization."
+        },
+        {
+            title: "5, 6, 7: التخطيط والمعلومات والتحكم",
+            title_en: "5, 6, 7: Plan, Info, Control",
+            content: `<ul>
+                <li><strong>5. التخطيط (Planning):</strong> لازم يكون في منهجية واضحة للتخطيط عشان ننجح.</li>
+                <li><strong>6. المعلومات (Information):</strong> بيانات دقيقة وتاريخية عشان نعرف نخطط صح.</li>
+                <li><strong>7. التحكم (Control):</strong> نظام مراقبة مدعوم بالمعلومات والتخطيط (عشان نعرف إحنا فين من الخطة).</li>
+            </ul>`,
+            content_en: `<ul>
+                <li><strong>5. Planning:</strong> Need good methodology for success.</li>
+                <li><strong>6. Information:</strong> Good historical data needed for planning.</li>
+                <li><strong>7. Control:</strong> Supported by planning & info subsystems.</li>
+            </ul>`,
+            expl: "الخطة (Plan)، الداتا اللي معانا (Info)، والمتابعة (Control).",
+            expl_en: "The Plan, The Data, and The Monitoring.",
+            q: "على ماذا يعتمد نظام التحكم؟", q_en: "Control relies on?", a: "التخطيط والمعلومات.", a_en: "Planning & Information."
+        },
+        {
+            title: "بنك الأسئلة الشامل 🎓",
+            title_en: "Final Question Bank 🎓",
+            content: `<p>مراجعة سريعة على أهم أسئلة المحاضرة الثانية.</p>`,
+            content_en: `<p>Quick review of Lecture 2 questions.</p>`,
+            expl: "اختبر نفسك في اللي فات.",
+            expl_en: "Test yourself.",
+            isQuizSlide: true 
+        }
+    ];
+
+    // --- المنطق (Logic) ---
+    let idx = 0;
+    let uiLang = 'ar';
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const dom = {
+        title: document.getElementById('slideHeader'),
+        content: document.getElementById('slideHtml'),
+        normalContainer: document.getElementById('normalSlideContent'),
+        quizContainer: document.getElementById('quizSlideContent'),
+        expl: document.getElementById('explText'),
+        badge: document.getElementById('slideBadge'),
+        list: document.getElementById('list'),
+        prev: document.getElementById('prevBtn'),
+        next: document.getElementById('nextBtn'),
+        lblExpl: document.getElementById('labelExpl'),
+        pageTitle: document.getElementById('pageTitle'),
+        langBtn: document.getElementById('langBtn'),
+        sidebar: document.getElementById('sidebar'),
+        search: document.getElementById('searchInp'),
+        quizBox: document.getElementById('quizContainer'),
+        quizIntro: document.getElementById('quizIntro'),
+        txtPrev: document.getElementById('txtPrev'),
+        txtNext: document.getElementById('txtNext')
+    };
+
+    function init() {
+        renderList();
+        
+        // استرجاع آخر مكان (Auto-Save)
+        const savedIdx = localStorage.getItem('sdlc_lec2_full_updated_slide');
+        if (savedIdx) {
+            idx = parseInt(savedIdx);
+            if (isNaN(idx) || idx >= slides.length) idx = 0;
+        } else {
+            idx = 0;
+        }
+
+        loadSlide(idx);
+        toggleTheme(); 
+        
+        // تفعيل اللمس (Swipe)
+        const card = document.getElementById('contentCard');
+        card.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+        card.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+    }
+
+    function handleSwipe() {
+        if (touchEndX < touchStartX - 50) move(1); // سحب لليسار (التالي)
+        if (touchEndX > touchStartX + 50) move(-1); // سحب لليمين (السابق)
+    }
+
+    function renderList() {
+        dom.list.innerHTML = '';
+        slides.forEach((s, i) => {
+            let li = document.createElement('li');
+            li.className = 'list-item';
+            let num = i === 0 ? '👋' : (s.isQuizSlide ? '🎓' : i);
+            let displayTitle = uiLang === 'ar' ? s.title : s.title_en;
+            li.innerHTML = `<span>${displayTitle}</span> <span style="font-size:0.8rem; opacity:0.7;">${num}</span>`;
+            li.onclick = () => loadSlide(i);
+            dom.list.appendChild(li);
+        });
+        updateActiveItem(idx);
+    }
+
+    function loadSlide(index) {
+        idx = index;
+        
+        // الحفظ التلقائي
+        localStorage.setItem('sdlc_lec2_full_updated_slide', idx);
+
+        // تحديث شريط التقدم
+        const progress = ((index + 1) / slides.length) * 100;
+        const bar = document.getElementById('progressBar');
+        if(bar) bar.style.width = `${progress}%`;
+
+        const s = slides[index];
+        const isAr = uiLang === 'ar';
+
+        dom.title.innerHTML = isAr ? s.title : s.title_en;
+        if (index === 0) dom.badge.innerText = isAr ? "البداية" : "Start";
+        else if (s.isQuizSlide) dom.badge.innerText = isAr ? "مراجعة" : "Review";
+        else dom.badge.innerText = isAr ? `شريحة ${index}` : `Slide ${index}`;
+
+        if (s.isQuizSlide) {
+            dom.normalContainer.style.display = 'none';
+            dom.quizContainer.style.display = 'block';
+            renderAllQuestions();
+        } else {
+            dom.normalContainer.style.display = 'block';
+            dom.quizContainer.style.display = 'none';
+            dom.content.innerHTML = isAr ? s.content : s.content_en;
+            dom.expl.innerHTML = isAr ? s.expl : s.expl_en;
+        }
+
+        dom.prev.disabled = index === 0;
+        dom.next.disabled = index === slides.length - 1;
+
+        updateActiveItem(index);
+        document.querySelectorAll('.section-box').forEach(b => b.classList.remove('open'));
+        if(window.innerWidth <= 768) dom.sidebar.classList.remove('open');
+    }
+
+    function renderAllQuestions() {
+        dom.quizBox.innerHTML = '';
+        const isAr = uiLang === 'ar';
+        slides.forEach((s, i) => {
+            if (s.q && s.a) {
+                let qDiv = document.createElement('div');
+                qDiv.className = 'quiz-item';
+                qDiv.innerHTML = `
+                    <div class="quiz-q" onclick="this.parentElement.classList.toggle('revealed')">
+                        <span>${i}. ${isAr ? s.q : s.q_en}</span>
+                        <span class="reveal-icon">▼</span>
+                    </div>
+                    <div class="quiz-a">${isAr ? s.a : s.a_en}</div>
+                `;
+                dom.quizBox.appendChild(qDiv);
+            }
+        });
+    }
+
+    function updateActiveItem(index) {
+        const items = document.querySelectorAll('.list-item');
+        items.forEach((item, i) => {
+            if(i === index) item.classList.add('active');
+            else item.classList.remove('active');
+        });
+    }
+
+    function move(step) {
+        const newIdx = idx + step;
+        if(newIdx >= 0 && newIdx < slides.length) loadSlide(newIdx);
+    }
+
+    function toggleSection(el) { el.classList.toggle('open'); }
+    function toggleSidebar() { dom.sidebar.classList.toggle('open'); }
+    function toggleInfo() { const modal = document.getElementById('infoModal'); modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex'; }
+
+    function filterSlides() {
+        const q = dom.search.value.toLowerCase();
+        const items = document.querySelectorAll('.list-item');
+        slides.forEach((s, i) => {
+            const t = uiLang === 'ar' ? s.title : s.title_en;
+            if(t.toLowerCase().includes(q)) items[i].style.display = 'flex';
+            else items[i].style.display = 'none';
+        });
+    }
+
+    function toggleLang() {
+        uiLang = uiLang === 'ar' ? 'en' : 'ar';
+        const isAr = uiLang === 'ar';
+        dom.langBtn.setAttribute('data-main', isAr ? "🇺🇸 English" : "🇪🇬 العربية");
+        dom.langBtn.setAttribute('data-hover', isAr ? "Switch ⇆" : "تغيير ⇆");
+        dom.pageTitle.innerText = isAr ? "المحاضرة الثانية" : "Lecture Two";
+        dom.txtPrev.innerText = isAr ? "السابق" : "Prev";
+        dom.txtNext.innerText = isAr ? "التالي" : "Next";
+        dom.lblExpl.innerText = isAr ? "💡 الشرح المبسط" : "💡 Simple Explanation";
+        dom.search.placeholder = isAr ? "بحث..." : "Search...";
+        dom.quizIntro.innerText = isAr ? "اضغط على السؤال لإظهار الإجابة:" : "Click question to reveal answer:";
+        document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+        document.documentElement.lang = isAr ? 'ar' : 'en';
+        renderList();
+        loadSlide(idx);
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const isLight = body.getAttribute('data-theme') === 'light';
+        body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+        const chk = document.getElementById('themeCheckbox');
+        if(chk) chk.checked = !isLight;
+    }
+
+    init();
+
+    // --- Ta'meen (Security) Logic ---
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    document.ondragstart = function() { return false; };
+    document.onkeydown = function(e) {
+        if (e.keyCode == 123) return false;
+        if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+        if (e.ctrlKey && (e.keyCode == 'U'.charCodeAt(0) || e.keyCode == 'S'.charCodeAt(0) || e.keyCode == 'P'.charCodeAt(0))) return false;
+    };
+</script>
+
+</body>
